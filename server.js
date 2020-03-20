@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const passport = require('passport');
 
 // routes / apis
 const users = require('./routs/api/users');
@@ -9,16 +11,23 @@ const profile = require('./routs/api/profile');
 
 const app = express();
 
+// body parser middleware
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
 // db config
 const db = require('./config/keys').mongoURI;
 mongoose
-.connect(db)
+  .connect(db, { useNewUrlParser: true, useUnifiedTopology: true})
 .then(() => console.log('mongodb connected'))
 .catch(err => console.log(' ======= db connection error ========= ', err));
 
 
-app.get('/', (req, res)=> res.send('hello!'));
+// passport middleware
+app.use(passport.initialize());
+// passport config
+require('./config/passport')(passport);
+
 // use routes
 app.use('/api/users', users);
 app.use('/api/profile', profile);
